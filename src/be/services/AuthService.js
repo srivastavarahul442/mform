@@ -14,9 +14,9 @@ class AuthService {
     try {
       const body = await request.json();
 
-      const { companyName, firstName, email, password } = body;
+      const { companyName, firstName, lastName, email, password } = body;
 
-      if (!companyName || !firstName || !email || !password) {
+      if (!companyName || !firstName || !lastName || !email || !password) {
         return NextResponse.json(
           {
             success: false,
@@ -51,6 +51,7 @@ class AuthService {
       const owner = await User.create({
         companyId: company._id,
         firstName,
+        lastName,
         email: email.toLowerCase(),
         password: hashedPassword,
         role: "owner",
@@ -135,6 +136,7 @@ class AuthService {
         user: {
           _id: user._id,
           firstName: user.firstName,
+          lastName: user.lastName,
           email: user.email,
           companyId: user.companyId,
         },

@@ -17,7 +17,7 @@ class UserService {
 
       const body = await request.json();
 
-      const { firstName, email, password } = body;
+      const { firstName, lastName, email, password } = body;
 
       const existingUser = await User.findOne({
         email,
@@ -40,6 +40,7 @@ class UserService {
       const user = await User.create({
         companyId: currentUser.companyId,
         firstName,
+        lastName,
         email,
         password: hashedPassword,
         role: "user",

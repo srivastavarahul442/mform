@@ -81,7 +81,7 @@ class FormService {
 
         isDeleted: false,
       })
-        .populate("createdBy", "firstName email")
+        .populate("createdBy", "firstName lastName email")
         .sort({
           createdAt: -1,
         });
@@ -347,7 +347,7 @@ class FormService {
         formId: form._id,
       })
         .select("version status createdAt updatedAt createdBy")
-        .populate("createdBy", "firstName email")
+        .populate("createdBy", "firstName lastName email")
         .sort({
           version: -1,
         });
