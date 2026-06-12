@@ -20,6 +20,10 @@ const formSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    allowMultipleSubmissions: {
+      type: Boolean,
+      default: false,
+    },
 
     description: {
       type: String,
@@ -29,6 +33,7 @@ const formSchema = new mongoose.Schema(
     slug: {
       type: String,
       required: true,
+      unique: true,
     },
 
     status: {

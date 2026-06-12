@@ -38,6 +38,25 @@ const submissionSchema = new mongoose.Schema(
       ref: "FormVersion",
       required: true,
     },
+    submittedBy: {
+      phone: {
+        type: String,
+        required: true,
+        index: true,
+        trim: true
+      },
+      name: {
+        type: String,
+        default: null,
+      },
+
+      email: {
+        type: String,
+        default: null,
+        lowercase: true,
+        trim: true
+      },
+    },
 
     answers: {
       type: [answerSchema],
@@ -64,6 +83,16 @@ submissionSchema.index({
   formId: 1,
   createdAt: -1,
 });
+
+submissionSchema.index(
+  {
+    formId: 1,
+    "submittedBy.phone": 1,
+  },
+  {
+    unique: true,
+  },
+);
 
 export default mongoose.models.Submission ||
   mongoose.model("Submission", submissionSchema);

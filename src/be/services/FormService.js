@@ -5,17 +5,19 @@ import FormVersion from "../models/FormVersion";
 import Submission from "../models/Submission";
 import { connectDB } from "../config/db";
 import { validateSubmission } from "../utils/formValidator";
+import { isValidEmail, isValidPhone, } from "../utils/validators";
 
 import { loginAuth } from "../middlewares/loginAuth";
 
 class FormService {
   async createForm(request) {
+    await connectDB();
     try {
       const currentUser = await loginAuth(request);
 
       const body = await request.json();
 
-      const { title, description } = body;
+      const { title, description, allowMultipleSubmissions } = body;
 
       if (!title) {
         return NextResponse.json(
@@ -38,6 +40,7 @@ class FormService {
         title,
         description,
         slug,
+        allowMultipleSubmissions
       });
 
       await FormVersion.create({
@@ -202,15 +205,10 @@ class FormService {
 
         version = await FormVersion.create({
           companyId: form.companyId,
-
           formId: form._id,
-
           version: nextVersion,
-
           sections: sections || version.sections,
-
           status: "draft",
-
           createdBy: currentUser._id,
         });
 
@@ -432,7 +430,46 @@ class FormService {
 
       const body = await request.json();
 
-      const { answers } = body;
+      const { answers, submittedBy } = body;
+
+      if (!submittedBy?.phone) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: "Phone number is required",
+          },
+          {
+            status: 400,
+          },
+        );
+      }
+
+      if (!isValidPhone(submittedBy.phone)) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: "Invalid phone number",
+          },
+          {
+            status: 400,
+          },
+        );
+      }
+
+      if (
+        submittedBy.email &&
+        !isValidEmail(submittedBy.email)
+      ) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: "Invalid email",
+          },
+          {
+            status: 400,
+          },
+        );
+      }
 
       const form = await Form.findOne({
         _id: id,
@@ -484,10 +521,34 @@ class FormService {
         );
       }
 
+      if (!form.allowMultipleSubmissions) {
+        const existingSubmission =
+          await Submission.findOne({
+            formId: form._id,
+
+            "submittedBy.phone":
+              submittedBy.phone,
+          });
+
+        if (existingSubmission) {
+          return NextResponse.json(
+            {
+              success: false,
+              message:
+                "You have already submitted this form",
+            },
+            {
+              status: 409,
+            },
+          );
+        }
+      }
+
       const submission = await Submission.create({
         companyId: form.companyId,
         formId: form._id,
         versionId: version._id,
+        submittedBy,
         answers,
       });
 
