@@ -20,5 +20,18 @@ export const UserService = {
       throw new Error(errorData.message || 'Failed to create user');
     }
     return res.json();
+  },
+
+  updateUser: async (id, data) => {
+    const res = await fetch(`/api/v0/users/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      throw new Error(errorData.message || 'Failed to update user');
+    }
+    return res.json();
   }
 };
