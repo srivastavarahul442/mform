@@ -15,6 +15,7 @@ const MenuIcon = (props) => <SvgIcon {...props}><path d="M3 18h18v-2H3v2zm0-5h18
 const FormIcon = (props) => <SvgIcon {...props}><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></SvgIcon>;
 const UsersIcon = (props) => <SvgIcon {...props}><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></SvgIcon>;
 const LogoutIcon = (props) => <SvgIcon {...props}><path d="M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5c-1.11 0-2 .9-2 2v4h2V5h14v14H5v-4H3v4c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></SvgIcon>;
+const KeyIcon = (props) => <SvgIcon {...props}><path d="M12.65 10C11.83 7.67 9.61 6 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6c2.61 0 4.83-1.67 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></SvgIcon>;
 
 export default function DashboardLayout({ children }) {
   const { user, loading, logout } = useAuth();
@@ -54,6 +55,10 @@ export default function DashboardLayout({ children }) {
   const menuItems = [
     { text: 'Forms Dashboard', icon: <FormIcon />, path: '/dashboard/forms' },
     { text: 'Team Directory', icon: <UsersIcon />, path: '/dashboard/employees' },
+  ];
+
+  const settingsItems = [
+    { text: 'API Keys', icon: <KeyIcon />, path: '/dashboard/settings/api-keys' },
   ];
 
   const drawer = (
@@ -117,6 +122,46 @@ export default function DashboardLayout({ children }) {
           );
         })}
       </List>
+
+      {/* Settings section */}
+      <Box sx={{ px: 2, pb: 1 }}>
+        <Typography variant="overline" color="text.secondary" sx={{ fontWeight: 600, letterSpacing: 1 }}>
+          Developer
+        </Typography>
+        <List disablePadding>
+          {settingsItems.map((item) => {
+            const active = pathname.startsWith(item.path);
+            return (
+              <ListItem key={item.text} disablePadding sx={{ mb: 0.5 }}>
+                <ListItemButton
+                  selected={active}
+                  onClick={() => router.push(item.path)}
+                  sx={{
+                    borderRadius: 2,
+                    '&.Mui-selected': {
+                      bgcolor: 'primary.50',
+                      color: 'primary.main',
+                      '&:hover': { bgcolor: 'primary.100' }
+                    }
+                  }}
+                >
+                  <ListItemIcon sx={{ minWidth: 40, color: active ? 'primary.main' : 'text.secondary' }}>
+                    {item.icon}
+                  </ListItemIcon>
+                  <ListItemText
+                    disableTypography
+                    primary={
+                      <Typography sx={{ fontWeight: active ? 600 : 500, fontSize: '0.9rem' }}>
+                        {item.text}
+                      </Typography>
+                    }
+                  />
+                </ListItemButton>
+              </ListItem>
+            );
+          })}
+        </List>
+      </Box>
       
       <Box sx={{ p: 2 }}>
         <Box sx={{ p: 2, bgcolor: 'background.default', borderRadius: 2, textAlign: 'center' }}>
@@ -154,7 +199,11 @@ export default function DashboardLayout({ children }) {
           </IconButton>
           
           <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontWeight: 600 }}>
-            {pathname.includes('/employees') ? 'Team Directory' : 'Forms Dashboard'}
+            {pathname.includes('/employees') ? 'Team Directory'
+              : pathname.includes('/settings/api-keys') ? 'API Keys'
+              : pathname.includes('/submissions') ? 'Form Submissions'
+              : pathname.includes('/builder') ? 'Form Builder'
+              : 'Forms Dashboard'}
           </Typography>
 
           <Box sx={{ flexGrow: 0 }}>
