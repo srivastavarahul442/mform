@@ -3,7 +3,9 @@ import { NextResponse } from "next/server";
 import Form from "../models/Form";
 import FormVersion from "../models/FormVersion";
 import Submission from "../models/Submission";
+import FormInvite from "../models/FormInvite";
 import { connectDB } from "../config/db";
+import { v4 as uuidv4 } from "uuid";
 import { validateSubmission } from "../utils/formValidator";
 import { isValidEmail, isValidPhone, } from "../utils/validators";
 
@@ -129,10 +131,13 @@ class FormService {
         );
       }
 
+      console.log(form.latestVersion, form)
+
       const version = await FormVersion.findOne({
         formId: form._id,
-        version: form.activeVersion,
+        version: form.latestVersion,
       });
+      console.log(version)
 
       return NextResponse.json({
         success: true,
@@ -400,6 +405,21 @@ class FormService {
         status: "published",
       });
 
+      // Handle token if present
+      const token = request.nextUrl?.searchParams?.get("token");
+      let prefilledUser = null;
+
+      if (token) {
+        const invite = await FormInvite.findOne({ token, formId: form._id });
+        if (!invite) {
+          return NextResponse.json({ success: false, message: "Invalid or expired unique link" }, { status: 400 });
+        }
+        if (invite.status === "completed") {
+          return NextResponse.json({ success: false, message: "This unique link has already been used" }, { status: 400 });
+        }
+        prefilledUser = invite.targetUser;
+      }
+
       return NextResponse.json({
         success: true,
 
@@ -410,6 +430,7 @@ class FormService {
         },
 
         sections: version.sections,
+        prefilledUser,
       });
     } catch (error) {
       return NextResponse.json(
@@ -430,7 +451,7 @@ class FormService {
 
       const body = await request.json();
 
-      const { answers, submittedBy } = body;
+      const { answers, submittedBy, token } = body;
 
       if (!submittedBy?.phone) {
         return NextResponse.json(
@@ -521,7 +542,19 @@ class FormService {
         );
       }
 
-      if (!form.allowMultipleSubmissions) {
+      let invite = null;
+      if (token) {
+        invite = await FormInvite.findOne({ token, formId: form._id });
+        if (!invite || invite.status === "completed") {
+          return NextResponse.json({ success: false, message: "Invalid or already used unique link" }, { status: 400 });
+        }
+        // Force submittedBy to match the invite target user
+        submittedBy.phone = invite.targetUser.phone;
+        submittedBy.email = invite.targetUser.email;
+        submittedBy.name = invite.targetUser.name;
+      }
+
+      if (!form.allowMultipleSubmissions && !token) {
         const existingSubmission =
           await Submission.findOne({
             formId: form._id,
@@ -551,6 +584,12 @@ class FormService {
         submittedBy,
         answers,
       });
+
+      if (invite) {
+        invite.status = "completed";
+        invite.submissionId = submission._id;
+        await invite.save();
+      }
 
       return NextResponse.json(
         {
@@ -620,6 +659,51 @@ class FormService {
           status: 500,
         },
       );
+    }
+  }
+
+  async generateInvite(request, params) {
+    await connectDB();
+    try {
+      const currentUser = await loginAuth(request);
+      const { id } = await params;
+      const body = await request.json();
+      const { name, phone, email } = body;
+
+      if (!phone) {
+        return NextResponse.json({ success: false, message: "Phone number is required for the target user" }, { status: 400 });
+      }
+
+      const form = await Form.findOne({
+        _id: id,
+        companyId: currentUser.companyId,
+        isDeleted: false,
+      });
+
+      if (!form) return NextResponse.json({ success: false, message: "Form not found" }, { status: 404 });
+
+      const version = await FormVersion.findOne({
+        formId: form._id,
+        version: form.activeVersion,
+        status: "published",
+      });
+
+      if (!version) return NextResponse.json({ success: false, message: "Published form version not found" }, { status: 404 });
+
+      const token = uuidv4();
+
+      const invite = await FormInvite.create({
+        companyId: form.companyId,
+        formId: form._id,
+        versionId: version._id,
+        createdBy: currentUser._id,
+        targetUser: { name, phone, email },
+        token,
+      });
+
+      return NextResponse.json({ success: true, token, invite });
+    } catch (error) {
+      return NextResponse.json({ success: false, message: error.message }, { status: 500 });
     }
   }
 }
