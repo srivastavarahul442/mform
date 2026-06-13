@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import React, { useState, useEffect, Suspense } from 'react';
+import { useParams, useSearchParams } from 'next/navigation';
 import {
     Box, Typography, Button, Card, CardContent, CircularProgress, Alert, Paper,
     TextField, RadioGroup, Radio, FormControlLabel, Checkbox, FormGroup,
@@ -12,9 +12,11 @@ import { FormService } from '@/src/fe/services/form.service';
 
 const CheckCircleIcon = (props) => <SvgIcon {...props}><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" /></SvgIcon>;
 
-export default function PublicFormPage() {
+function PublicFormContent() {
     const params = useParams();
     const { id } = params;
+    const searchParams = useSearchParams();
+    const token = searchParams.get('token') || '';
 
     const [formMeta, setFormMeta] = useState(null);
     const [sections, setSections] = useState([]);
@@ -34,9 +36,18 @@ export default function PublicFormPage() {
     const fetchForm = async () => {
         try {
             setLoading(true);
-            const data = await FormService.getPublicForm(id);
+            const data = await FormService.getPublicForm(id, token);
             setFormMeta(data.form);
             setSections(data.sections || []);
+
+            // Auto-fill details if token provided and prefilledUser is returned
+            if (data.prefilledUser) {
+                setSubmitter({
+                    name: data.prefilledUser.name || '',
+                    phone: data.prefilledUser.phone || '',
+                    email: data.prefilledUser.email || ''
+                });
+            }
 
             // Initialize answer state
             const initialAnswers = {};
@@ -82,7 +93,8 @@ export default function PublicFormPage() {
 
             await FormService.submitPublicForm(id, {
                 submittedBy: submitter,
-                answers: payloadAnswers
+                answers: payloadAnswers,
+                token
             });
 
             setSuccess(true);
@@ -149,13 +161,17 @@ export default function PublicFormPage() {
                                     fullWidth
                                     value={submitter.name}
                                     onChange={(e) => setSubmitter({ ...submitter, name: e.target.value })}
+                                    slotProps={token ? { htmlInput: { readOnly: true } } : {}}
+                                    sx={token ? { bgcolor: '#f8fafc' } : {}}
                                 />
                                 <TextField
-                                    label="Phone Number"
-                                    fullWidth
+                                    label="Phone Number (Required)"
                                     required
+                                    fullWidth
                                     value={submitter.phone}
                                     onChange={(e) => setSubmitter({ ...submitter, phone: e.target.value })}
+                                    slotProps={token ? { htmlInput: { readOnly: true } } : {}}
+                                    sx={token ? { bgcolor: '#f8fafc' } : {}}
                                 />
                                 <TextField
                                     label="Email Address"
@@ -163,6 +179,8 @@ export default function PublicFormPage() {
                                     fullWidth
                                     value={submitter.email}
                                     onChange={(e) => setSubmitter({ ...submitter, email: e.target.value })}
+                                    slotProps={token ? { htmlInput: { readOnly: true } } : {}}
+                                    sx={token ? { bgcolor: '#f8fafc' } : {}}
                                 />
                             </Box>
                         </CardContent>
@@ -334,5 +352,13 @@ export default function PublicFormPage() {
 
             </Box>
         </Box>
+    );
+}
+
+export default function PublicFormPage() {
+    return (
+        <Suspense fallback={<Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}><CircularProgress /></Box>}>
+            <PublicFormContent />
+        </Suspense>
     );
 }
