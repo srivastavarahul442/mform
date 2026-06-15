@@ -5,7 +5,7 @@ import Submission from "../models/Submission";
 import { connectDB } from "../config/db";
 
 import { loginAuth } from "../middlewares/loginAuth";
-
+// This service handles analytics-related operations, such as fetching submission counts for forms.
 class AnalyticsService {
   async getFormAnalytics(request, params) {
     await connectDB();
