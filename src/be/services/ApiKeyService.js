@@ -4,6 +4,7 @@ import ApiKey from "../models/ApiKey";
 import Form from "../models/Form";
 import FormVersion from "../models/FormVersion";
 import FormInvite from "../models/FormInvite";
+import Submission from "../models/Submission";
 import { loginAuth } from "../middlewares/loginAuth";
 import { apiKeyAuth, generateRawApiKey, hashApiKey } from "../utils/apiKeyAuth";
 import { v4 as uuidv4 } from "uuid";
@@ -177,6 +178,76 @@ class ApiKeyService {
       );
     } catch (error) {
       const status = error.message.includes("API key") ? 401 : 500;
+      return NextResponse.json(
+        { success: false, message: error.message },
+        { status }
+      );
+    }
+  }
+  // ─── External Public API: Get invite status & submission by token ────────────
+  async getExternalInviteSubmission(request, params) {
+    await connectDB();
+    try {
+      const apiKey = await apiKeyAuth(request);
+      const { id: formId, token } = await params;
+
+      // Find the invite — must belong to this form & company
+      const invite = await FormInvite.findOne({
+        token,
+        formId,
+        companyId: apiKey.companyId,
+      });
+
+      if (!invite) {
+        return NextResponse.json(
+          { success: false, message: "Invite not found or does not belong to your account" },
+          { status: 404 }
+        );
+      }
+
+      const responseData = {
+        success: true,
+        invite: {
+          token: invite.token,
+          status: invite.status,
+          targetUser: invite.targetUser,
+          createdAt: invite.createdAt,
+        },
+        submission: null,
+      };
+
+      // If completed, attach the submission with human-readable field labels
+      if (invite.status === "completed" && invite.submissionId) {
+        const submission = await Submission.findById(invite.submissionId).lean();
+
+        if (submission) {
+          // Build fieldId → label map from the form version
+          const version = await FormVersion.findById(submission.versionId).lean();
+          const fieldMap = {};
+          if (version?.sections) {
+            for (const section of version.sections) {
+              for (const field of section.fields || []) {
+                fieldMap[field.id] = field.label;
+              }
+            }
+          }
+
+          responseData.submission = {
+            _id: submission._id,
+            submittedAt: submission.submittedAt,
+            submittedBy: submission.submittedBy,
+            answers: (submission.answers || []).map((ans) => ({
+              fieldId: ans.fieldId,
+              fieldLabel: fieldMap[ans.fieldId] || ans.fieldId,
+              value: ans.value,
+            })),
+          };
+        }
+      }
+
+      return NextResponse.json(responseData);
+    } catch (error) {
+      const status = error.message?.includes("API key") ? 401 : 500;
       return NextResponse.json(
         { success: false, message: error.message },
         { status }
