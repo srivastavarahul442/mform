@@ -74,6 +74,7 @@ class UserService {
 
   async getUsers(request) {
     try {
+      await connectDB();
       const currentUser = await loginAuth(request);
 
       userAuth(currentUser, ["owner"]);
@@ -101,6 +102,7 @@ class UserService {
 
   async getUserById(request, params) {
     try {
+      await connectDB();
       const currentUser = await loginAuth(request);
 
       const { id } = await params;
@@ -141,6 +143,7 @@ class UserService {
 
   async updateUser(request, params) {
     try {
+      await connectDB();
       const currentUser = await loginAuth(request);
 
       const { id } = await params;
@@ -187,6 +190,7 @@ class UserService {
 
   async deactivateUser(request, params) {
     try {
+      await connectDB();
       const currentUser = await loginAuth(request);
 
       const { id } = await params;

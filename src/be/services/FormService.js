@@ -76,6 +76,7 @@ class FormService {
 
   async getForms(request) {
     try {
+      await connectDB();
       const currentUser = await loginAuth(request);
 
       const forms = await Form.find({
@@ -159,6 +160,7 @@ class FormService {
 
   async updateForm(request, params) {
     try {
+      await connectDB();
       const currentUser = await loginAuth(request);
 
       const { id } = await params;
@@ -326,6 +328,7 @@ class FormService {
 
   async getFormVersions(request, params) {
     try {
+      await connectDB();
       const currentUser = await loginAuth(request);
 
       const { id } = await params;
@@ -379,6 +382,7 @@ class FormService {
 
   async getPublicForm(request, params) {
     try {
+      await connectDB();
       const { id } = await params;
 
       const form = await Form.findOne({
@@ -447,6 +451,7 @@ class FormService {
 
   async submitForm(request, params) {
     try {
+      await connectDB();
       const { id } = await params;
 
       const body = await request.json();
@@ -616,6 +621,7 @@ class FormService {
 
   async getFormSubmissions(request, params) {
     try {
+      await connectDB();
       const currentUser = await loginAuth(request);
 
       const { id } = await params;
