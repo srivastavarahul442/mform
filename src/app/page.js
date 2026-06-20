@@ -111,8 +111,8 @@ function Navbar({ scrolled, mobileOpen, setMobileOpen }) {
           <span style={{ color: "#fff", fontWeight: 800, fontSize: 20, letterSpacing: "-0.02em" }}>MForm</span>
         </div>
 
-        {/* Desktop Nav */}
-        <div style={{ display: "flex", alignItems: "center", gap: 32, display: "none" }} className="desktop-nav">
+        {/* Desktop Nav Links — hidden on mobile */}
+        <div className="desktop-nav" style={{ alignItems: "center", gap: 32 }}>
           {["Features", "How It Works", "Pricing", "FAQ"].map(item => (
             <a key={item} href={`#${item.toLowerCase().replace(" ", "-")}`} style={{ color: "rgba(255,255,255,0.7)", textDecoration: "none", fontSize: 14, fontWeight: 500, transition: "color 0.2s" }}
               onMouseEnter={e => e.target.style.color = "#fff"} onMouseLeave={e => e.target.style.color = "rgba(255,255,255,0.7)"}>
@@ -121,33 +121,44 @@ function Navbar({ scrolled, mobileOpen, setMobileOpen }) {
           ))}
         </div>
 
-        {/* CTA Buttons */}
+        {/* CTA Buttons — shown on desktop only */}
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <Link href="/login" style={{ color: "rgba(255,255,255,0.85)", textDecoration: "none", fontSize: 14, fontWeight: 600, padding: "8px 20px", borderRadius: 8, border: "1px solid rgba(255,255,255,0.15)", transition: "all 0.2s" }}
+          {/* Login + Get Started: desktop only */}
+          <Link href="/login" className="nav-cta-btn" style={{ color: "rgba(255,255,255,0.85)", textDecoration: "none", fontSize: 14, fontWeight: 600, padding: "8px 20px", borderRadius: 8, border: "1px solid rgba(255,255,255,0.15)", transition: "all 0.2s", whiteSpace: "nowrap" }}
             onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,0.08)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.3)"; }}
             onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.15)"; }}>
             Log in
           </Link>
-          <Link href="/register" style={{ color: "#fff", textDecoration: "none", fontSize: 14, fontWeight: 700, padding: "8px 20px", borderRadius: 8, background: "linear-gradient(135deg, #6366f1, #8b5cf6)", transition: "all 0.2s", boxShadow: "0 4px 15px rgba(99,102,241,0.4)" }}
+          <Link href="/register" className="nav-cta-btn" style={{ color: "#fff", textDecoration: "none", fontSize: 14, fontWeight: 700, padding: "8px 20px", borderRadius: 8, background: "linear-gradient(135deg, #6366f1, #8b5cf6)", transition: "all 0.2s", boxShadow: "0 4px 15px rgba(99,102,241,0.4)", whiteSpace: "nowrap" }}
             onMouseEnter={e => e.currentTarget.style.transform = "translateY(-1px)"}
             onMouseLeave={e => e.currentTarget.style.transform = "translateY(0)"}>
-            Get Started Free
+            Get Started
           </Link>
-          <button onClick={() => setMobileOpen(!mobileOpen)} style={{ background: "none", border: "none", color: "#fff", cursor: "pointer", display: "block", padding: 4 }} className="mobile-menu-btn">
+          {/* Hamburger: mobile only */}
+          <button onClick={() => setMobileOpen(!mobileOpen)} className="mobile-menu-btn" style={{ background: "none", border: "none", color: "#fff", cursor: "pointer", padding: 4, display: "flex", alignItems: "center" }}>
             {mobileOpen ? <IconClose /> : <IconMenu />}
           </button>
         </div>
       </div>
 
-      {/* Mobile Nav */}
+      {/* Mobile Nav Dropdown */}
       {mobileOpen && (
-        <div style={{ background: "rgba(10,10,20,0.98)", backdropFilter: "blur(20px)", padding: "20px 24px 28px", borderTop: "1px solid rgba(255,255,255,0.08)" }}>
+        <div style={{ background: "rgba(10,10,20,0.98)", backdropFilter: "blur(20px)", padding: "16px 24px 24px", borderTop: "1px solid rgba(255,255,255,0.08)" }}>
           {["Features", "How It Works", "Pricing", "FAQ"].map(item => (
             <a key={item} href={`#${item.toLowerCase().replace(" ", "-")}`} onClick={() => setMobileOpen(false)}
-              style={{ display: "block", color: "rgba(255,255,255,0.8)", textDecoration: "none", fontSize: 16, fontWeight: 500, padding: "14px 0", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+              style={{ display: "block", color: "rgba(255,255,255,0.8)", textDecoration: "none", fontSize: 15, fontWeight: 500, padding: "13px 0", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
               {item}
             </a>
           ))}
+          {/* CTA inside mobile menu */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 20 }}>
+            <Link href="/login" onClick={() => setMobileOpen(false)} style={{ display: "block", textAlign: "center", textDecoration: "none", color: "rgba(255,255,255,0.85)", fontSize: 15, fontWeight: 600, padding: "12px", borderRadius: 10, border: "1px solid rgba(255,255,255,0.18)", background: "rgba(255,255,255,0.04)" }}>
+              Log in
+            </Link>
+            <Link href="/register" onClick={() => setMobileOpen(false)} style={{ display: "block", textAlign: "center", textDecoration: "none", color: "#fff", fontSize: 15, fontWeight: 700, padding: "12px", borderRadius: 10, background: "linear-gradient(135deg, #6366f1, #8b5cf6)", boxShadow: "0 4px 15px rgba(99,102,241,0.4)" }}>
+              Get Started Free
+            </Link>
+          </div>
         </div>
       )}
     </nav>
@@ -222,8 +233,14 @@ export default function LandingPage() {
         ::-webkit-scrollbar { width: 6px; } 
         ::-webkit-scrollbar-track { background: #0d0d1a; }
         ::-webkit-scrollbar-thumb { background: #6366f1; border-radius: 3px; }
+        /* Mobile defaults */
+        .desktop-nav { display: none; }
+        .nav-cta-btn { display: none !important; }
+        .mobile-menu-btn { display: flex !important; }
+        /* Desktop overrides */
         @media (min-width: 768px) {
           .desktop-nav { display: flex !important; }
+          .nav-cta-btn { display: inline-flex !important; }
           .mobile-menu-btn { display: none !important; }
         }
       `}</style>
