@@ -93,9 +93,9 @@ export default function SubmissionsPage() {
   }
 
   return (
-    <Box sx={{ maxWidth: '1200px', mx: 'auto', px: 3, pb: 6 }}>
+    <Box sx={{ maxWidth: '1200px', mx: 'auto', px: 3, pb: 2, height: 'calc(100vh - 64px)', display: 'flex', flexDirection: 'column' }}>
       {/* Top Navigation */}
-      <Box sx={{ mb: 4, pt: 2, display: 'flex', alignItems: 'center' }}>
+      <Box sx={{ mb: 2, pt: 1, display: 'flex', alignItems: 'center', flexShrink: 0 }}>
         <Button
           startIcon={<BackIcon />}
           onClick={() => router.push('/dashboard/forms')}
@@ -107,7 +107,7 @@ export default function SubmissionsPage() {
 
       {/* Header */}
       <Paper sx={{
-        p: 4, mb: 4, borderRadius: 4,
+        p: 3, mb: 2, borderRadius: 4, flexShrink: 0,
         background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
         boxShadow: '0 10px 30px rgba(30,41,59,0.2)',
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
@@ -152,12 +152,12 @@ export default function SubmissionsPage() {
         </Box>
       </Paper>
 
-      {error && <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>{error}</Alert>}
+      {error && <Alert severity="error" sx={{ mb: 2, borderRadius: 2, flexShrink: 0 }}>{error}</Alert>}
 
       {/* Submissions Table */}
-      <Card sx={{ borderRadius: 4, border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', overflow: 'hidden' }}>
-        <TableContainer>
-          <Table>
+      <Card sx={{ borderRadius: 4, border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', overflow: 'hidden', display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+        <TableContainer sx={{ flex: 1, overflow: 'auto' }}>
+          <Table stickyHeader>
             <TableHead>
               <TableRow sx={{ bgcolor: '#f8fafc' }}>
                 <TableCell sx={{ fontWeight: 700, color: '#475569', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', py: 2 }}>Respondent</TableCell>
