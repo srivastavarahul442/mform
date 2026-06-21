@@ -282,12 +282,12 @@ export default function SubmissionsPage() {
                 }}
                 MenuProps={{
                   anchorOrigin: {
-                    vertical: 'bottom',
-                    horizontal: 'left',
+                    vertical: 'top',
+                    horizontal: 'center',
                   },
                   transformOrigin: {
-                    vertical: 'top',
-                    horizontal: 'left',
+                    vertical: 'bottom',
+                    horizontal: 'center',
                   },
                 }}
                 sx={{ height: 28, fontSize: '0.875rem', bgcolor: 'white', borderRadius: 1.5, '& .MuiSelect-select': { py: 0.25 } }}
