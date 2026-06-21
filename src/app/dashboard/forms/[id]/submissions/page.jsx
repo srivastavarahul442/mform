@@ -15,6 +15,8 @@ const BackIcon = (props) => <SvgIcon {...props}><path d="M20 11H7.83l5.59-5.59L1
 const ViewIcon = (props) => <SvgIcon {...props}><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" /></SvgIcon>;
 const PersonIcon = (props) => <SvgIcon {...props}><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" /></SvgIcon>;
 const InboxIcon = (props) => <SvgIcon {...props}><path d="M19 3H4.99C3.89 3 3 3.9 3 5L3 19c0 1.1.89 2 1.99 2H19c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 12h-4c0 1.66-1.35 3-3 3s-3-1.34-3-3H4.99V5H19v10z" /></SvgIcon>;
+const ChevronLeftIcon = (props) => <SvgIcon {...props}><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" /></SvgIcon>;
+const ChevronRightIcon = (props) => <SvgIcon {...props}><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" /></SvgIcon>;
 
 export default function SubmissionsPage() {
   const params = useParams();
@@ -29,7 +31,7 @@ export default function SubmissionsPage() {
   
   // Pagination State
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const [limit, setLimit] = useState(8);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const [jumpPage, setJumpPage] = useState('');
@@ -211,55 +213,81 @@ export default function SubmissionsPage() {
           </Table>
         </TableContainer>
         {totalCount > 0 && (
-          <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #e2e8f0', bgcolor: '#f8fafc', flexWrap: 'wrap', gap: 2 }}>
+          <Box sx={{ p: 2, display: 'flex', justifyContent: 'flex-end', alignItems: 'center', borderTop: '1px solid #e2e8f0', bgcolor: '#f8fafc', flexWrap: 'wrap', gap: 3 }}>
+            
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <IconButton 
+                size="small" 
+                disabled={page <= 1}
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                sx={{ border: '1px solid #e2e8f0', bgcolor: 'white', '&:hover': { bgcolor: '#f1f5f9' }, width: 32, height: 32 }}
+              >
+                <ChevronLeftIcon fontSize="small" />
+              </IconButton>
+
+              <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                Page
+                <TextField
+                  size="small"
+                  value={jumpPage !== '' ? jumpPage : page}
+                  onChange={(e) => setJumpPage(e.target.value)}
+                  onBlur={() => {
+                    const p = parseInt(jumpPage);
+                    if (p && p >= 1 && p <= totalPages) {
+                      setPage(p);
+                    }
+                    setJumpPage('');
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      const p = parseInt(jumpPage);
+                      if (p && p >= 1 && p <= totalPages) {
+                        setPage(p);
+                      }
+                      setJumpPage('');
+                    }
+                  }}
+                  sx={{ 
+                    width: 44, 
+                    bgcolor: 'white', 
+                    '& .MuiInputBase-root': { height: 28, fontSize: '0.875rem', borderRadius: 1.5 },
+                    '& input': { textAlign: 'center', p: 0.5 }
+                  }}
+                />
+                of {totalPages}
+              </Typography>
+
+              <IconButton 
+                size="small" 
+                disabled={page >= totalPages}
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                sx={{ border: '1px solid #e2e8f0', bgcolor: 'white', '&:hover': { bgcolor: '#f1f5f9' }, width: 32, height: 32 }}
+              >
+                <ChevronRightIcon fontSize="small" />
+              </IconButton>
+            </Box>
+
+            <Typography variant="body2" color="text.secondary">
+              Total: {totalCount}
+            </Typography>
+
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Typography variant="body2" color="text.secondary">Rows per page:</Typography>
+              <Typography variant="body2" color="text.secondary">Rows:</Typography>
               <Select
                 size="small"
                 value={limit}
                 onChange={(e) => {
                   setLimit(e.target.value);
-                  setPage(1); // Reset to page 1 when changing limit
+                  setPage(1);
                 }}
-                sx={{ height: 32, fontSize: '0.875rem', bgcolor: 'white' }}
+                sx={{ height: 28, fontSize: '0.875rem', bgcolor: 'white', borderRadius: 1.5, '& .MuiSelect-select': { py: 0.25 } }}
               >
-                <MenuItem value={10}>10</MenuItem>
-                <MenuItem value={25}>25</MenuItem>
-                <MenuItem value={50}>50</MenuItem>
-                <MenuItem value={100}>100</MenuItem>
+                {[8, 16, 24, 32].map(val => (
+                  <MenuItem key={val} value={val}>{val}</MenuItem>
+                ))}
               </Select>
             </Box>
 
-            {totalPages > 1 && (
-              <Pagination 
-                count={totalPages} 
-                page={page} 
-                onChange={(e, val) => setPage(val)} 
-                color="primary" 
-                shape="rounded"
-                sx={{ '& .MuiPaginationItem-root': { fontWeight: 600 } }}
-              />
-            )}
-
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Typography variant="body2" color="text.secondary">Go to:</Typography>
-              <TextField
-                size="small"
-                value={jumpPage}
-                onChange={(e) => setJumpPage(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    const p = parseInt(jumpPage);
-                    if (p && p >= 1 && p <= totalPages) {
-                      setPage(p);
-                      setJumpPage('');
-                    }
-                  }
-                }}
-                placeholder="Page"
-                sx={{ width: 70, bgcolor: 'white', '& .MuiInputBase-root': { height: 32, fontSize: '0.875rem' } }}
-              />
-            </Box>
           </Box>
         )}
       </Card>
