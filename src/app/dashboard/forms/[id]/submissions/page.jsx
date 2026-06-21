@@ -225,7 +225,7 @@ export default function SubmissionsPage() {
                 <ChevronLeftIcon fontSize="small" />
               </IconButton>
 
-              <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography component="div" variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 Page
                 <TextField
                   size="small"
