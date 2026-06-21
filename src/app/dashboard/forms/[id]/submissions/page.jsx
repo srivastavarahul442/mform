@@ -50,9 +50,10 @@ export default function SubmissionsPage() {
     }
   };
 
-  const getFieldLabel = (fieldId) => {
-    if (!version || !version.sections) return fieldId;
-    for (const sec of version.sections) {
+  const getFieldLabel = (fieldId, subVersion) => {
+    const targetVersion = subVersion || version; // fallback to active version if missing
+    if (!targetVersion || !targetVersion.sections) return fieldId;
+    for (const sec of targetVersion.sections) {
       const f = sec.fields?.find(fld => fld.id === fieldId);
       if (f) return f.label;
     }
@@ -249,7 +250,7 @@ export default function SubmissionsPage() {
                   viewSub.answers.map((ans, idx) => (
                     <Box key={idx} sx={{ p: 2.5, borderRadius: 3, bgcolor: '#f8fafc', border: '1px solid #e2e8f0' }}>
                       <Typography variant="caption" color="#64748b" fontWeight={700} display="block" sx={{ textTransform: 'uppercase', letterSpacing: '0.05em', mb: 0.75 }}>
-                        {getFieldLabel(ans.fieldId)}
+                        {getFieldLabel(ans.fieldId, viewSub.versionId)}
                       </Typography>
                       <Typography variant="body1" fontWeight="600" color="#0f172a">
                         {Array.isArray(ans.value) ? ans.value.join(', ') : (ans.value?.toString() || '—')}

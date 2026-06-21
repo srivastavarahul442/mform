@@ -737,7 +737,7 @@ class FormService {
 
       const submissions = await Submission.find({
         formId: form._id,
-      }).sort({
+      }).populate('versionId', 'version sections').sort({
         createdAt: -1,
       });
 
