@@ -95,7 +95,7 @@ export default function ApiKeysPage() {
     : '';
 
   return (
-    <Box sx={{ width: '100%', px: { xs: 1, sm: 2 }, py: 2 }}>
+    <Box sx={{ width: '100%' }}>
       {/* Header */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 5 }}>
         <Box>

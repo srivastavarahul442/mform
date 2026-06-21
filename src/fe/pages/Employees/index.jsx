@@ -111,7 +111,7 @@ export default function EmployeesPage() {
   };
 
   return (
-    <Box sx={{ width: '100%', px: { xs: 1, sm: 2 }, py: 2 }}>
+    <Box sx={{ width: '100%' }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 4, alignItems: 'flex-start' }}>
         <Box>
           <Typography variant="h4" fontWeight="800" sx={{ color: '#1e293b', letterSpacing: '-0.5px' }}>Team Directory</Typography>

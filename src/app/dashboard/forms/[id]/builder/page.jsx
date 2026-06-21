@@ -281,7 +281,7 @@ export default function FormBuilderPage() {
   );
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 80px)', overflow: 'hidden' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1, overflow: 'hidden' }}>
 
       {/* ── Top Bar ───────────────────────────────────────────────────────── */}
       <Paper sx={{ px: 3, py: 1.5, mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderRadius: 3, flexShrink: 0 }}>
