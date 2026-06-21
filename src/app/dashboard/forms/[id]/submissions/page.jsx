@@ -93,7 +93,7 @@ export default function SubmissionsPage() {
   }
 
   return (
-    <Box sx={{ maxWidth: '1200px', mx: 'auto', px: 3, pb: 2, height: 'calc(100vh - 64px)', display: 'flex', flexDirection: 'column' }}>
+    <Box sx={{ width: '100%', px: { xs: 1, sm: 2 }, pb: 2, height: 'calc(100vh - 64px)', display: 'flex', flexDirection: 'column' }}>
       {/* Top Navigation */}
       <Box sx={{ mb: 2, pt: 1, display: 'flex', alignItems: 'center', flexShrink: 0 }}>
         <Button
