@@ -5,7 +5,8 @@ import { useParams, useRouter } from 'next/navigation';
 import {
   Box, Typography, Button, Grid, Card, CardContent, TextField,
   IconButton, CircularProgress, Alert, Paper, Divider, Checkbox,
-  FormControlLabel, Select, MenuItem, Chip, Rating, Tooltip, InputAdornment
+  FormControlLabel, Select, MenuItem, Chip, Rating, Tooltip, InputAdornment,
+  Dialog, DialogTitle, DialogContent, DialogActions
 } from '@mui/material';
 import { FormService } from '@/src/fe/services/form.service';
 import SvgIcon from '@mui/material/SvgIcon';
@@ -30,6 +31,7 @@ const MultiSelectIcon = (props) => <SvgIcon {...props}><path d="M3 5h2V3c-1.1 0-
 const FileIcon = (props) => <SvgIcon {...props}><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z" /></SvgIcon>;
 const RatingIcon = (props) => <SvgIcon {...props}><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></SvgIcon>;
 const SignatureIcon = (props) => <SvgIcon {...props}><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" /></SvgIcon>;
+const EditIcon = (props) => <SvgIcon {...props}><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" /></SvgIcon>;
 
 // ─── Field type catalog (grouped) ────────────────────────────────────────────
 const FIELD_GROUPS = [
@@ -155,6 +157,33 @@ export default function FormBuilderPage() {
   const [selectedId, setSelectedId] = useState(null);
   const [isDragOver, setIsDragOver] = useState(false);
 
+  // ── Edit Meta Dialog ─────────────────────────────────────────────────────
+  const [editOpen, setEditOpen] = useState(false);
+  const [editData, setEditData] = useState({ title: '', description: '' });
+  const [editSaving, setEditSaving] = useState(false);
+  const [editError, setEditError] = useState('');
+
+  const openEditDialog = () => {
+    setEditData({ title: formMeta?.title || '', description: formMeta?.description || '' });
+    setEditError('');
+    setEditOpen(true);
+  };
+
+  const handleSaveMeta = async () => {
+    if (!editData.title.trim()) { setEditError('Title is required'); return; }
+    setEditError('');
+    setEditSaving(true);
+    try {
+      await FormService.updateFormMeta(id, { title: editData.title, description: editData.description });
+      setFormMeta(prev => ({ ...prev, title: editData.title, description: editData.description }));
+      setEditOpen(false);
+    } catch (err) {
+      setEditError(err.message || 'Failed to update');
+    } finally {
+      setEditSaving(false);
+    }
+  };
+
   useEffect(() => { fetchForm(); }, [id]);
 
   const fetchForm = async () => {
@@ -256,9 +285,16 @@ export default function FormBuilderPage() {
 
       {/* ── Top Bar ───────────────────────────────────────────────────────── */}
       <Paper sx={{ px: 3, py: 1.5, mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderRadius: 3, flexShrink: 0 }}>
-        <Box>
-          <Typography variant="h6" fontWeight="800" color="#1e293b">{formMeta?.title}</Typography>
-          <Typography variant="caption" color="text.secondary">Drag fields into the canvas · click a field to edit properties</Typography>
+        <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+          <Box>
+            <Typography variant="h6" fontWeight="800" color="#1e293b">{formMeta?.title}</Typography>
+            <Typography variant="caption" color="text.secondary">Drag fields into the canvas · click a field to edit properties</Typography>
+          </Box>
+          <Tooltip title="Edit title & description">
+            <IconButton size="small" onClick={openEditDialog} sx={{ mt: 0.25, color: '#94a3b8', '&:hover': { color: '#6366f1', bgcolor: '#eef2ff' } }}>
+              <EditIcon sx={{ fontSize: 16 }} />
+            </IconButton>
+          </Tooltip>
         </Box>
         <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center' }}>
           {error && <Alert severity="error" sx={{ py: 0, fontSize: '0.8rem' }}>{error}</Alert>}
@@ -520,6 +556,39 @@ export default function FormBuilderPage() {
           )}
         </Paper>
       </Box>
+
+      {/* ── Edit Title & Description Dialog ─────────────────────────────── */}
+      <Dialog open={editOpen} onClose={() => setEditOpen(false)} maxWidth="sm" fullWidth slotProps={{ paper: { sx: { borderRadius: 3, p: 1 } } }}>
+        <DialogTitle sx={{ fontWeight: 800, pb: 0.5 }}>Edit Form Details</DialogTitle>
+        <DialogContent sx={{ pt: 2 }}>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+            Update the form title and description. Changes apply immediately.
+          </Typography>
+          {editError && <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>{editError}</Alert>}
+          <TextField
+            label="Form Title"
+            value={editData.title}
+            onChange={e => setEditData(p => ({ ...p, title: e.target.value }))}
+            fullWidth required autoFocus
+            slotProps={{ input: { sx: { borderRadius: 2 } } }}
+            sx={{ mb: 2 }}
+          />
+          <TextField
+            label="Description (optional)"
+            value={editData.description}
+            onChange={e => setEditData(p => ({ ...p, description: e.target.value }))}
+            fullWidth multiline rows={3}
+            slotProps={{ input: { sx: { borderRadius: 2 } } }}
+          />
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setEditOpen(false)} sx={{ color: 'text.secondary', fontWeight: 600 }}>Cancel</Button>
+          <Button onClick={handleSaveMeta} variant="contained" disabled={editSaving}
+            sx={{ borderRadius: 2, px: 4, fontWeight: 600, background: 'linear-gradient(135deg,#6366f1,#8b5cf6)' }}>
+            {editSaving ? <CircularProgress size={22} color="inherit" /> : 'Save Changes'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

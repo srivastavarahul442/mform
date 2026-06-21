@@ -255,6 +255,60 @@ class FormService {
     }
   }
 
+  // ── Update form meta (title + description only) ────────────────────────────
+  // Separate from updateForm() which manages FormVersions/sections.
+  // Exposed via PUT /api/v0/forms/[id]
+  async updateFormMeta(request, params) {
+    try {
+      await connectDB();
+      const currentUser = await loginAuth(request);
+      const { id } = await params;
+      const body = await request.json();
+
+      const { title, description } = body;
+
+      if (!title || !title.trim()) {
+        return NextResponse.json(
+          { success: false, message: "Title is required" },
+          { status: 400 }
+        );
+      }
+
+      const form = await Form.findOne({
+        _id: id,
+        companyId: currentUser.companyId,
+        isDeleted: false,
+      });
+
+      if (!form) {
+        return NextResponse.json(
+          { success: false, message: "Form not found" },
+          { status: 404 }
+        );
+      }
+
+      form.title = title.trim();
+      form.description = description !== undefined ? description : form.description;
+      await form.save();
+
+      return NextResponse.json({
+        success: true,
+        message: "Form updated successfully",
+        form: {
+          _id: form._id,
+          title: form.title,
+          description: form.description,
+          updatedAt: form.updatedAt,
+        },
+      });
+    } catch (error) {
+      return NextResponse.json(
+        { success: false, message: error.message },
+        { status: 500 }
+      );
+    }
+  }
+
   async publishForm(request, params) {
     try {
       await connectDB();

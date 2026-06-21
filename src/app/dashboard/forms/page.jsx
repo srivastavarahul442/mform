@@ -13,6 +13,7 @@ const ViewIcon = (props) => <SvgIcon {...props}><path d="M12 4.5C7 4.5 2.73 7.61
 const AnalyticsIcon = (props) => <SvgIcon {...props}><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z" /></SvgIcon>;
 const CopyIcon = (props) => <SvgIcon {...props}><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" /></SvgIcon>;
 const CheckIcon = (props) => <SvgIcon {...props}><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" /></SvgIcon>;
+const EditIcon = (props) => <SvgIcon {...props}><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" /></SvgIcon>;
 
 export default function FormsPage() {
     const router = useRouter();
@@ -36,6 +37,40 @@ export default function FormsPage() {
         description: '',
         allowMultipleSubmissions: false
     });
+
+    // Edit Dialog State
+    const [editDialogOpen, setEditDialogOpen] = useState(false);
+    const [editingForm, setEditingForm] = useState(null);
+    const [editData, setEditData] = useState({ title: '', description: '' });
+    const [editLoading, setEditLoading] = useState(false);
+    const [editError, setEditError] = useState('');
+
+    const openEditDialog = (form) => {
+        setEditingForm(form);
+        setEditData({ title: form.title || '', description: form.description || '' });
+        setEditError('');
+        setEditDialogOpen(true);
+    };
+
+    const handleEditChange = (e) => {
+        setEditData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    };
+
+    const handleSaveEdit = async () => {
+        if (!editData.title.trim()) { setEditError('Title is required'); return; }
+        setEditError('');
+        setEditLoading(true);
+        try {
+            await FormService.updateFormMeta(editingForm._id, { title: editData.title, description: editData.description });
+            setEditDialogOpen(false);
+            // Update the form in local state immediately (no re-fetch needed)
+            setForms(prev => prev.map(f => f._id === editingForm._id ? { ...f, title: editData.title, description: editData.description, updatedAt: new Date().toISOString() } : f));
+        } catch (err) {
+            setEditError(err.message || 'Failed to update form');
+        } finally {
+            setEditLoading(false);
+        }
+    };
 
     const fetchForms = async () => {
         try {
@@ -222,6 +257,15 @@ export default function FormsPage() {
                                         Responses
                                     </Button>
                                     <Box sx={{ display: 'flex', gap: 0.5 }}>
+                                        <Tooltip title="Edit Title & Description">
+                                            <IconButton
+                                                size="small"
+                                                onClick={() => openEditDialog(form)}
+                                                sx={{ color: '#94a3b8', '&:hover': { color: '#6366f1', bgcolor: '#eef2ff' } }}
+                                            >
+                                                <EditIcon fontSize="small" />
+                                            </IconButton>
+                                        </Tooltip>
                                         <Tooltip title={copiedId === form._id ? 'Copied!' : 'Copy Form ID'}>
                                             <IconButton
                                                 size="small"
@@ -302,6 +346,61 @@ export default function FormsPage() {
                     <Button onClick={() => setOpenDialog(false)} sx={{ color: 'text.secondary', fontWeight: 600 }}>Cancel</Button>
                     <Button onClick={handleCreateForm} variant="contained" disabled={formLoading} sx={{ borderRadius: 2, px: 4, fontWeight: 600 }}>
                         {formLoading ? <CircularProgress size={24} color="inherit" /> : 'Create'}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+            {/* Edit Form Dialog */}
+            <Dialog
+                open={editDialogOpen}
+                onClose={() => setEditDialogOpen(false)}
+                maxWidth="sm"
+                fullWidth
+                slotProps={{ paper: { sx: { borderRadius: 3, p: 1 } } }}
+            >
+                <DialogTitle sx={{ fontWeight: 800, pb: 0.5 }}>
+                    Edit Form Details
+                </DialogTitle>
+                <DialogContent sx={{ pt: 2 }}>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                        Update the title and description. Changes are saved immediately.
+                    </Typography>
+                    {editError && <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>{editError}</Alert>}
+                    <Grid container spacing={2.5}>
+                        <Grid size={{ xs: 12 }}>
+                            <TextField
+                                label="Form Title"
+                                name="title"
+                                value={editData.title}
+                                onChange={handleEditChange}
+                                fullWidth
+                                required
+                                autoFocus
+                                slotProps={{ input: { sx: { borderRadius: 2 } } }}
+                            />
+                        </Grid>
+                        <Grid size={{ xs: 12 }}>
+                            <TextField
+                                label="Description (optional)"
+                                name="description"
+                                value={editData.description}
+                                onChange={handleEditChange}
+                                fullWidth
+                                multiline
+                                rows={3}
+                                slotProps={{ input: { sx: { borderRadius: 2 } } }}
+                            />
+                        </Grid>
+                    </Grid>
+                </DialogContent>
+                <DialogActions sx={{ px: 3, pb: 2 }}>
+                    <Button onClick={() => setEditDialogOpen(false)} sx={{ color: 'text.secondary', fontWeight: 600 }}>Cancel</Button>
+                    <Button
+                        onClick={handleSaveEdit}
+                        variant="contained"
+                        disabled={editLoading}
+                        sx={{ borderRadius: 2, px: 4, fontWeight: 600, background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}
+                    >
+                        {editLoading ? <CircularProgress size={22} color="inherit" /> : 'Save Changes'}
                     </Button>
                 </DialogActions>
             </Dialog>

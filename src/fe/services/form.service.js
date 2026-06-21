@@ -43,6 +43,20 @@ export const FormService = {
     return res.json();
   },
 
+  // PUT: update only title + description (does NOT create a new FormVersion)
+  updateFormMeta: async (id, { title, description }) => {
+    const res = await fetch(`/api/v0/forms/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, description })
+    });
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      throw new Error(errorData.message || 'Failed to update form details');
+    }
+    return res.json();
+  },
+
   publishForm: async (id) => {
     const res = await fetch(`/api/v0/forms/${id}/publish`, {
       method: 'POST',
