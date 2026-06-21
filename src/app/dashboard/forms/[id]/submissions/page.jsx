@@ -280,6 +280,16 @@ export default function SubmissionsPage() {
                   setLimit(e.target.value);
                   setPage(1);
                 }}
+                MenuProps={{
+                  anchorOrigin: {
+                    vertical: 'bottom',
+                    horizontal: 'left',
+                  },
+                  transformOrigin: {
+                    vertical: 'top',
+                    horizontal: 'left',
+                  },
+                }}
                 sx={{ height: 28, fontSize: '0.875rem', bgcolor: 'white', borderRadius: 1.5, '& .MuiSelect-select': { py: 0.25 } }}
               >
                 {[8, 16, 24, 32].map(val => (
