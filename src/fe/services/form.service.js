@@ -77,6 +77,15 @@ export const FormService = {
     return res.json();
   },
 
+  getFormVersionByNum: async (id, version) => {
+    const res = await fetch(`/api/v0/forms/${id}/versions/${version}`);
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      throw new Error(errorData.message || 'Failed to fetch version');
+    }
+    return res.json();
+  },
+
   getFormSubmissions: async (id) => {
     const res = await fetch(`/api/v0/forms/${id}/submissions`);
     if (!res.ok) {

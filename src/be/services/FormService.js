@@ -434,6 +434,43 @@ class FormService {
     }
   }
 
+  // ── Get a specific version (with full sections) for preview ────────────────
+  // Exposed via GET /api/v0/forms/[id]/versions/[version]
+  async getFormVersionByNum(request, params) {
+    try {
+      await connectDB();
+      const currentUser = await loginAuth(request);
+      const { id, version } = await params;
+
+      const form = await Form.findOne({
+        _id: id,
+        companyId: currentUser.companyId,
+        isDeleted: false,
+      });
+
+      if (!form) {
+        return NextResponse.json({ success: false, message: "Form not found" }, { status: 404 });
+      }
+
+      const versionDoc = await FormVersion.findOne({
+        formId: form._id,
+        version: Number(version),
+      }).populate("createdBy", "firstName lastName email");
+
+      if (!versionDoc) {
+        return NextResponse.json({ success: false, message: "Version not found" }, { status: 404 });
+      }
+
+      return NextResponse.json({
+        success: true,
+        form: { title: form.title, description: form.description, activeVersion: form.activeVersion },
+        version: versionDoc,
+      });
+    } catch (error) {
+      return NextResponse.json({ success: false, message: error.message }, { status: 500 });
+    }
+  }
+
   async getPublicForm(request, params) {
     try {
       await connectDB();
