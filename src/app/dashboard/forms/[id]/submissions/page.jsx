@@ -34,7 +34,11 @@ export default function SubmissionsPage() {
   const [limit, setLimit] = useState(8);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
-  const [jumpPage, setJumpPage] = useState('');
+  const [jumpPage, setJumpPage] = useState('1');
+
+  useEffect(() => {
+    setJumpPage(page.toString());
+  }, [page]);
 
   // View details modal
   const [viewSub, setViewSub] = useState(null);
@@ -229,22 +233,24 @@ export default function SubmissionsPage() {
                 Page
                 <TextField
                   size="small"
-                  value={jumpPage !== '' ? jumpPage : page}
+                  value={jumpPage}
                   onChange={(e) => setJumpPage(e.target.value)}
                   onBlur={() => {
                     const p = parseInt(jumpPage);
                     if (p && p >= 1 && p <= totalPages) {
                       setPage(p);
+                    } else {
+                      setJumpPage(page.toString());
                     }
-                    setJumpPage('');
                   }}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       const p = parseInt(jumpPage);
                       if (p && p >= 1 && p <= totalPages) {
                         setPage(p);
+                      } else {
+                        setJumpPage(page.toString());
                       }
-                      setJumpPage('');
                     }
                   }}
                   sx={{ 
