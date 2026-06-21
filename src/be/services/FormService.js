@@ -735,15 +735,27 @@ class FormService {
         );
       }
 
+      const url = new URL(request.url);
+      const page = parseInt(url.searchParams.get('page')) || 1;
+      const limit = parseInt(url.searchParams.get('limit')) || 10;
+      const skip = (page - 1) * limit;
+
+      const totalCount = await Submission.countDocuments({ formId: form._id });
+
       const submissions = await Submission.find({
         formId: form._id,
-      }).populate('versionId', 'version sections').sort({
-        createdAt: -1,
-      });
+      })
+        .populate('versionId', 'version sections')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit);
 
       return NextResponse.json({
         success: true,
         count: submissions.length,
+        totalCount,
+        totalPages: Math.ceil(totalCount / limit),
+        currentPage: page,
         submissions,
       });
     } catch (error) {

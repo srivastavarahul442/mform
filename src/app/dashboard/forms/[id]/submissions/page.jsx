@@ -5,7 +5,8 @@ import { useParams, useRouter } from 'next/navigation';
 import {
   Box, Typography, Button, Card, CircularProgress, Alert, Paper, Grid,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip,
-  IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Divider, Avatar
+  IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Divider, Avatar, Pagination,
+  Select, MenuItem, TextField
 } from '@mui/material';
 import SvgIcon from '@mui/material/SvgIcon';
 import { FormService } from '@/src/fe/services/form.service';
@@ -25,24 +26,33 @@ export default function SubmissionsPage() {
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  
+  // Pagination State
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [jumpPage, setJumpPage] = useState('');
 
   // View details modal
   const [viewSub, setViewSub] = useState(null);
 
   useEffect(() => {
     fetchData();
-  }, [id]);
+  }, [id, page, limit]);
 
   const fetchData = async () => {
     try {
       setLoading(true);
       const [formData, subsData] = await Promise.all([
         FormService.getFormById(id),
-        FormService.getFormSubmissions(id)
+        FormService.getFormSubmissions(id, page, limit)
       ]);
       setFormMeta(formData.form);
       setVersion(formData.version);
       setSubmissions(subsData.submissions || []);
+      setTotalPages(subsData.totalPages || 1);
+      setTotalCount(subsData.totalCount || 0);
     } catch (err) {
       setError(err.message || 'Failed to load submissions data');
     } finally {
@@ -129,7 +139,7 @@ export default function SubmissionsPage() {
           border: '1px solid rgba(255,255,255,0.12)',
           borderRadius: 3, px: 4, py: 2.5
         }}>
-          <Typography variant="h3" fontWeight="900" sx={{ lineHeight: 1, color: '#ffffff' }}>{submissions.length}</Typography>
+          <Typography variant="h3" fontWeight="900" sx={{ lineHeight: 1, color: '#ffffff' }}>{totalCount}</Typography>
           <Typography variant="caption" fontWeight={600} sx={{ textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.7)' }}>
             Total Responses
           </Typography>
@@ -200,6 +210,58 @@ export default function SubmissionsPage() {
             </TableBody>
           </Table>
         </TableContainer>
+        {totalCount > 0 && (
+          <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #e2e8f0', bgcolor: '#f8fafc', flexWrap: 'wrap', gap: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography variant="body2" color="text.secondary">Rows per page:</Typography>
+              <Select
+                size="small"
+                value={limit}
+                onChange={(e) => {
+                  setLimit(e.target.value);
+                  setPage(1); // Reset to page 1 when changing limit
+                }}
+                sx={{ height: 32, fontSize: '0.875rem', bgcolor: 'white' }}
+              >
+                <MenuItem value={10}>10</MenuItem>
+                <MenuItem value={25}>25</MenuItem>
+                <MenuItem value={50}>50</MenuItem>
+                <MenuItem value={100}>100</MenuItem>
+              </Select>
+            </Box>
+
+            {totalPages > 1 && (
+              <Pagination 
+                count={totalPages} 
+                page={page} 
+                onChange={(e, val) => setPage(val)} 
+                color="primary" 
+                shape="rounded"
+                sx={{ '& .MuiPaginationItem-root': { fontWeight: 600 } }}
+              />
+            )}
+
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography variant="body2" color="text.secondary">Go to:</Typography>
+              <TextField
+                size="small"
+                value={jumpPage}
+                onChange={(e) => setJumpPage(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    const p = parseInt(jumpPage);
+                    if (p && p >= 1 && p <= totalPages) {
+                      setPage(p);
+                      setJumpPage('');
+                    }
+                  }
+                }}
+                placeholder="Page"
+                sx={{ width: 70, bgcolor: 'white', '& .MuiInputBase-root': { height: 32, fontSize: '0.875rem' } }}
+              />
+            </Box>
+          </Box>
+        )}
       </Card>
 
       {/* View Submission Details Dialog */}

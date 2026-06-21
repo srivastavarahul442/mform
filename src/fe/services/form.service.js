@@ -86,8 +86,8 @@ export const FormService = {
     return res.json();
   },
 
-  getFormSubmissions: async (id) => {
-    const res = await fetch(`/api/v0/forms/${id}/submissions`);
+  getFormSubmissions: async (id, page = 1, limit = 10) => {
+    const res = await fetch(`/api/v0/forms/${id}/submissions?page=${page}&limit=${limit}`);
     if (!res.ok) {
       const errorData = await res.json().catch(() => ({}));
       throw new Error(errorData.message || 'Failed to fetch form submissions');
