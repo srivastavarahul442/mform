@@ -279,7 +279,7 @@ export default function DashboardLayout({ children }) {
       </Box>
       <Box
         component="main"
-        sx={{ flexGrow: 1, p: 4, width: { sm: `calc(100% - ${drawerWidth}px)` }, bgcolor: '#f8fafc', minHeight: '100vh' }}
+        sx={{ flexGrow: 1, width: { sm: `calc(100% - ${drawerWidth}px)` }, bgcolor: '#f8fafc', minHeight: '100vh' }}
       >
         <Toolbar />
         {children}
