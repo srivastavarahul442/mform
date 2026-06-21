@@ -28,7 +28,7 @@ export default function SubmissionsPage() {
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  
+
   // Pagination State
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(8);
@@ -217,11 +217,11 @@ export default function SubmissionsPage() {
           </Table>
         </TableContainer>
         {totalCount > 0 && (
-          <Box sx={{ p: 2, display: 'flex', justifyContent: 'flex-end', alignItems: 'center', borderTop: '1px solid #e2e8f0', bgcolor: '#f8fafc', flexWrap: 'wrap', gap: 3 }}>
-            
+          <Box sx={{ p: 2, display: 'flex', justifyContent: 'center', alignItems: 'center', borderTop: '1px solid #e2e8f0', bgcolor: '#f8fafc', flexWrap: 'wrap', gap: 3 }}>
+
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              <IconButton 
-                size="small" 
+              <IconButton
+                size="small"
                 disabled={page <= 1}
                 onClick={() => setPage(p => Math.max(1, p - 1))}
                 sx={{ border: '1px solid #e2e8f0', bgcolor: 'white', '&:hover': { bgcolor: '#f1f5f9' }, width: 32, height: 32 }}
@@ -253,9 +253,9 @@ export default function SubmissionsPage() {
                       }
                     }
                   }}
-                  sx={{ 
-                    width: 44, 
-                    bgcolor: 'white', 
+                  sx={{
+                    width: 44,
+                    bgcolor: 'white',
                     '& .MuiInputBase-root': { height: 28, fontSize: '0.875rem', borderRadius: 1.5 },
                     '& input': { textAlign: 'center', p: 0.5 }
                   }}
@@ -263,8 +263,8 @@ export default function SubmissionsPage() {
                 of {totalPages}
               </Typography>
 
-              <IconButton 
-                size="small" 
+              <IconButton
+                size="small"
                 disabled={page >= totalPages}
                 onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                 sx={{ border: '1px solid #e2e8f0', bgcolor: 'white', '&:hover': { bgcolor: '#f1f5f9' }, width: 32, height: 32 }}
