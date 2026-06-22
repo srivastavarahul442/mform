@@ -279,17 +279,17 @@ export default function DashboardLayout({ children }) {
       </Box>
       <Box
         component="main"
-        sx={{ 
-          flexGrow: 1, 
-          width: { sm: `calc(100% - ${drawerWidth}px)` }, 
-          bgcolor: '#f8fafc', 
+        sx={{
+          flexGrow: 1,
+          width: { sm: `calc(100% - ${drawerWidth}px)` },
+          bgcolor: '#f8fafc',
           minHeight: '100vh',
           display: 'flex',
           flexDirection: 'column',
           p: { xs: 2, md: 3 }
         }}
       >
-        <Toolbar sx={{ flexShrink: 0, minHeight: { xs: 0, sm: 0 }, p: 0, m: 0 }} />
+        <Toolbar sx={{ flexShrink: 0, minHeight: { xs: 0, sm: 0 }, p: 0, m: 2 }} />
         <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', mt: { xs: 2, sm: 3 } }}>
           {children}
         </Box>

@@ -4,8 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { Box, Typography, Button, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Grid, Alert, Avatar, Chip, SvgIcon, IconButton, CircularProgress, Menu, MenuItem } from '@mui/material';
 import { UserService } from '@/src/fe/services/user.service';
 
-const AddIcon = (props) => <SvgIcon {...props}><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></SvgIcon>;
-const MoreVertIcon = (props) => <SvgIcon {...props}><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></SvgIcon>;
+const AddIcon = (props) => <SvgIcon {...props}><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" /></SvgIcon>;
+const MoreVertIcon = (props) => <SvgIcon {...props}><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" /></SvgIcon>;
 
 export default function EmployeesPage() {
   const [users, setUsers] = useState([]);
@@ -13,7 +13,7 @@ export default function EmployeesPage() {
   const [openDialog, setOpenDialog] = useState(false);
   const [pageError, setPageError] = useState('');
   const [formError, setFormError] = useState('');
-  
+
   // Menu and Edit state
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
@@ -91,7 +91,7 @@ export default function EmployeesPage() {
         await UserService.createUser(formData);
       }
       handleCloseDialog();
-      fetchUsers(); 
+      fetchUsers();
     } catch (err) {
       setFormError(err.message || `Failed to ${isEditing ? 'update' : 'create'} employee`);
     }
@@ -117,18 +117,18 @@ export default function EmployeesPage() {
           <Typography variant="h4" fontWeight="800" sx={{ color: '#1e293b', letterSpacing: '-0.5px' }}>Team Directory</Typography>
           <Typography variant="body1" color="text.secondary" sx={{ mt: 0.5 }}>Manage your workspace members and their roles.</Typography>
         </Box>
-        <Button 
-          variant="contained" 
+        <Button
+          variant="contained"
           startIcon={<AddIcon />}
-          onClick={() => { 
-            setIsEditing(false); 
-            setFormData({ firstName: '', lastName: '', email: '', password: '' }); 
-            setFormError(''); 
-            setOpenDialog(true); 
+          onClick={() => {
+            setIsEditing(false);
+            setFormData({ firstName: '', lastName: '', email: '', password: '' });
+            setFormError('');
+            setOpenDialog(true);
           }}
-          sx={{ 
-            borderRadius: 2, 
-            textTransform: 'none', 
+          sx={{
+            borderRadius: 2,
+            textTransform: 'none',
             fontWeight: 600,
             px: 3,
             py: 1,
@@ -183,28 +183,28 @@ export default function EmployeesPage() {
                         </Box>
                       </TableCell>
                       <TableCell sx={{ borderBottom: '1px solid #f1f5f9' }}>
-                        <Chip 
-                          label={u.role === 'owner' ? 'Owner' : 'Employee'} 
-                          size="small" 
-                          sx={{ 
+                        <Chip
+                          label={u.role === 'owner' ? 'Owner' : 'Employee'}
+                          size="small"
+                          sx={{
                             bgcolor: u.role === 'owner' ? '#f3e8ff' : '#e0f2fe',
                             color: u.role === 'owner' ? '#7e22ce' : '#0369a1',
                             fontWeight: 600,
                             borderRadius: 1.5
-                          }} 
+                          }}
                         />
                       </TableCell>
                       <TableCell sx={{ borderBottom: '1px solid #f1f5f9' }}>
-                        <Chip 
-                          label={u.isActive !== false ? 'Active' : 'Inactive'} 
-                          size="small" 
+                        <Chip
+                          label={u.isActive !== false ? 'Active' : 'Inactive'}
+                          size="small"
                           variant="outlined"
-                          sx={{ 
+                          sx={{
                             borderColor: u.isActive !== false ? '#86efac' : '#fca5a5',
                             color: u.isActive !== false ? '#166534' : '#991b1b',
                             fontWeight: 500,
                             borderRadius: 1.5
-                          }} 
+                          }}
                         />
                       </TableCell>
                       <TableCell align="right" sx={{ borderBottom: '1px solid #f1f5f9' }}>
@@ -234,21 +234,21 @@ export default function EmployeesPage() {
       </Menu>
 
       {/* Create / Edit Employee Dialog */}
-      <Dialog 
-        open={openDialog} 
-        onClose={handleCloseDialog} 
-        maxWidth="sm" 
+      <Dialog
+        open={openDialog}
+        onClose={handleCloseDialog}
+        maxWidth="sm"
         fullWidth
         slotProps={{
           paper: { sx: { borderRadius: 3, p: 1 } }
         }}
       >
-        <DialogTitle sx={{ fontWeight: 800, pb: 1 }}>{isEditing ? 'Edit Member Details' : 'Invite New Member'}</DialogTitle>
+        <DialogTitle sx={{ fontWeight: 800, pb: 1 }}>{isEditing ? 'Edit Member Details' : 'Add New Employee'}</DialogTitle>
         <DialogContent sx={{ pt: 2 }}>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            {isEditing 
+            {isEditing
               ? 'Update the employee details below.'
-              : 'Add a new employee to your workspace. They will receive an email to set up their account.'}
+              : 'Add a new employee to your workspace.'}
           </Typography>
           {formError && <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>{formError}</Alert>}
           <Grid container spacing={2.5}>

@@ -285,16 +285,16 @@ export default function FormBuilderPage() {
 
       {/* ── Top Bar ───────────────────────────────────────────────────────── */}
       <Paper sx={{ px: 3, py: 1.5, mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderRadius: 3, flexShrink: 0 }}>
-        <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
-          <Box>
+        <Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Typography variant="h6" fontWeight="800" color="#1e293b">{formMeta?.title}</Typography>
-            <Typography variant="caption" color="text.secondary">Drag fields into the canvas · click a field to edit properties</Typography>
+            <Tooltip title="Edit title & description">
+              <IconButton size="small" onClick={openEditDialog} sx={{ color: '#94a3b8', '&:hover': { color: '#6366f1', bgcolor: '#eef2ff' }, width: 28, height: 28 }}>
+                <EditIcon sx={{ fontSize: 16 }} />
+              </IconButton>
+            </Tooltip>
           </Box>
-          <Tooltip title="Edit title & description">
-            <IconButton size="small" onClick={openEditDialog} sx={{ mt: 0.25, color: '#94a3b8', '&:hover': { color: '#6366f1', bgcolor: '#eef2ff' } }}>
-              <EditIcon sx={{ fontSize: 16 }} />
-            </IconButton>
-          </Tooltip>
+          <Typography variant="caption" color="text.secondary">Drag fields into the canvas · click a field to edit properties</Typography>
         </Box>
         <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center' }}>
           {error && <Alert severity="error" sx={{ py: 0, fontSize: '0.8rem' }}>{error}</Alert>}
